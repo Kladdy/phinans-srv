@@ -1,6 +1,7 @@
 require('dotenv-flow').config();
 import bodyParser from "body-parser";
 import express from "express";
+import cors from "cors";
 
 import connectDB from "../config/database";
 import auth from "./routes/api/auth";
@@ -8,6 +9,14 @@ import user from "./routes/api/user";
 import profile from "./routes/api/profile";
 
 const app = express();
+
+// CORS
+var corsOptions = {
+  origin: 'http://localhost:3000',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+app.use(cors(corsOptions))
 
 // Connect to MongoDB
 connectDB();
