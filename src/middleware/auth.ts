@@ -24,6 +24,6 @@ export default function(req: Request, res: Response, next: NextFunction) {
   } catch (err) {
     res
       .status(HttpStatusCodes.UNAUTHORIZED)
-      .json({ msg: "Token is not valid" });
+      .json({ msg: "Token is not valid: " + err.message});
   }
 }

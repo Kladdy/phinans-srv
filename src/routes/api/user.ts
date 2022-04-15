@@ -5,6 +5,7 @@ import { check, validationResult } from "express-validator/check";
 import gravatar from "gravatar";
 import HttpStatusCodes from "http-status-codes";
 import jwt from "jsonwebtoken";
+import auth from "../../middleware/auth";
 
 import Payload from "../../types/Payload";
 import Request from "../../types/Request";
@@ -90,10 +91,10 @@ router.post(
 
 // @route   GET api/user
 // @desc    Get all users
-// @access  Public
+// @access  Private
 router.get(
   "/all",
-  [],
+  auth,
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
