@@ -19,7 +19,6 @@ const sessionSchema: Schema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     required: true,
-    unique: true
   },
   expires: {
     type: Date
