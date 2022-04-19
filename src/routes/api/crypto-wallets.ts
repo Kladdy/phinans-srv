@@ -52,6 +52,17 @@ router.post(
           updated: new Date(),
         };
 
+        const balances = await getBalances(walletFieldsNiceHash)
+        
+        // Check if response contains errors
+        if (balances.error_id != null) {
+          return res.status(HttpStatusCodes.UNPROCESSABLE_ENTITY).json({
+            error: true,
+            errors: balances.errors
+          });
+        }
+
+        // If no errors, add this wallet
         const wallet = new WalletNiceHash(walletFieldsNiceHash);
 
         await wallet.save();
@@ -60,6 +71,7 @@ router.post(
       }
       else {
         return res.status(HttpStatusCodes.BAD_REQUEST).json({
+          error: true,
           errors: [
             {
               msg: "Broker not supported",
