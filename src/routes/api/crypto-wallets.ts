@@ -19,8 +19,59 @@ import WalletDataNiceHash from "../../models/CryptoWallets/WalletDataNiceHash";
 
 const router: Router = Router();
 
+// @route   GET crypto-wallets/get-wallet-data
+// @desc    Get data for all wallets on account
+// @access  Private
+router.get(
+  "/get-wallet-data",
+  auth,
+  [],
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ errors: errors.array() });
+    }
+
+    const userIdAsObjectId = req.userIdAsObjectId;
+
+    var walletData : any = {nicehash: []}
+
+    try {
+        // NiceHash
+        {
+          // Find all NiceHash wallets for user
+          const allWalletsNiceHash = await WalletNiceHash.find({userId: userIdAsObjectId}).exec();
+
+          if (allWalletsNiceHash != null) {
+            for (const wallet of allWalletsNiceHash) {
+              // Get wallet data for the wallet
+              const data = await WalletDataNiceHash.find({userId: userIdAsObjectId, walletId: wallet._id}).exec();
+              walletData.nicehash.push({walletId: wallet._id, walletLabel: wallet.label, data: data})
+            }
+          }
+        }
+
+        res.json(walletData);
+
+    } catch (err) {
+      console.error(err.message);
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: true,
+        errors: [
+          {
+            message: "Server Error",
+          },
+        ],
+      });
+    }
+  }
+);
+
 // @route   GET crypto-wallets/fetch
-// @desc    Fetch data for all wallets on account
+// @desc    Fetch data from brokers for all wallets on account
 // @access  Private
 router.get(
   "/fetch",
@@ -37,16 +88,16 @@ router.get(
 
     const userIdAsObjectId = req.userIdAsObjectId;
 
+    var fetchErrors : any = {nicehash: []}
+
     try {
-        var fetchErrors : any = {nicehash: []}
-      
         // NiceHash
         {
           // Find all NiceHash wallets for user
           const allWalletsNiceHash = await WalletNiceHash.find({userId: userIdAsObjectId}).exec();
 
           if (allWalletsNiceHash != null) {
-            allWalletsNiceHash.forEach(async wallet => {
+            for (const wallet of allWalletsNiceHash) {
               // Get balances to test if the configuration is valid
               const balances = await getBalances(wallet)
 
@@ -75,12 +126,11 @@ router.get(
 
               await walletData.save();
 
-
-            })
+            }
           }
-
-          res.json({});
         }
+
+      res.json({});
 
     } catch (err) {
       console.error(err.message);
