@@ -92,8 +92,8 @@ const getBalances = (wallet: any) => {
       headers: headers
     },
     (res) => {
-      console.log('statusCode:', res.statusCode);
-      console.log('headers:', res.headers);
+      // console.log('statusCode:', res.statusCode);
+      // console.log('headers:', res.headers);
     
       let body = "";
 

@@ -20,7 +20,7 @@ export default function(req: Request, res: Response, next: NextFunction) {
   // Verify token
   try {
     const payload: Payload | any = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = payload.userId;
+    req.userId = payload.sub;
     req.userIdAsObjectId = Types.ObjectId(req.userId);
     next();
   } catch (err) {

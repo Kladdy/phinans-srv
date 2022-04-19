@@ -37,13 +37,14 @@ router.post(
     }
 
     const { brokerName, walletFields } = req.body;
-    const userId = req.userId;
+    const userIdAsObjectId = req.userIdAsObjectId;
 
     try {
       if (brokerName == "NiceHash") {
+
         // Build crypto wallet object based on IWalletNiceHash
         const walletFieldsNiceHash = {
-          userId: Types.ObjectId(userId),
+          userId: userIdAsObjectId,
           organizationId: walletFields.organizationId,
           apiKey: walletFields.apiKey,
           apiSecret: walletFields.apiSecret,
@@ -52,6 +53,26 @@ router.post(
           updated: new Date(),
         };
 
+        // Check if wallet already exists with the given configuration
+        const walletExists = await WalletNiceHash.exists({
+          userId: userIdAsObjectId,
+          organizationId: walletFields.organizationId,
+          apiKey: walletFields.apiKey,
+          apiSecret: walletFields.apiSecret
+        });
+
+        if (walletExists == true) {
+          return res.status(HttpStatusCodes.BAD_REQUEST).json({
+            error: true,
+            errors: [
+              {
+                message: "Wallet already exists",
+              },
+            ],
+          });
+        }
+
+        // Get balances to test if the configuration is valid
         const balances = await getBalances(walletFieldsNiceHash)
         
         // Check if response contains errors
@@ -74,7 +95,7 @@ router.post(
           error: true,
           errors: [
             {
-              msg: "Broker not supported",
+              message: "Broker not supported",
             },
           ],
         });
@@ -82,7 +103,14 @@ router.post(
 
     } catch (err) {
       console.error(err.message);
-      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).send("Server Error");
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: true,
+        errors: [
+          {
+            message: "Server Error",
+          },
+        ],
+      });
     }
   }
 );
