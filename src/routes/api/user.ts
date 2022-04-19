@@ -10,6 +10,7 @@ import auth from "../../middleware/auth";
 import Payload from "../../types/Payload";
 import Request from "../../types/Request";
 import User, { IUser } from "../../models/User";
+import { Types } from "mongoose";
 
 const router: Router = Router();
 
@@ -70,7 +71,8 @@ router.post(
       await user.save();
 
       const payload: Payload = {
-        userId: user.id
+        userId: user.id,
+        userIdAsObjectId: Types.ObjectId(user.id)
       };
 
       jwt.sign(

@@ -28,6 +28,7 @@ router.post(
     check("brokerName", "Please specify a broker").not().isEmpty(),
   ],
   async (req: Request, res: Response) => {
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res
@@ -40,14 +41,15 @@ router.post(
 
     try {
       if (brokerName == "NiceHash") {
-        // Build crypto wallet object based on IUser
+        // Build crypto wallet object based on IWalletNiceHash
         const walletFieldsNiceHash = {
           userId: Types.ObjectId(userId),
           organizationId: walletFields.organizationId,
           apiKey: walletFields.apiKey,
           apiSecret: walletFields.apiSecret,
+          label: walletFields.label,
           created: new Date(),
-          updated: new Date()
+          updated: new Date(),
         };
 
         const wallet = new WalletNiceHash(walletFieldsNiceHash);

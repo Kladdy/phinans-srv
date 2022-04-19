@@ -14,6 +14,7 @@ export interface IWalletNiceHash extends Document {
   organizationId: string;
   apiKey: string;
   apiSecret: string;
+  label: string;
   created: Date;
   updated: Date;
 }
@@ -34,6 +35,9 @@ const walletNiceHashSchema: Schema = new Schema({
   apiSecret: {
     type: String,
     required: true,
+  },
+  label: {
+    type: String
   },
   created: {
     type: Date
