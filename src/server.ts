@@ -8,8 +8,12 @@ import auth from "./routes/api/auth";
 import user from "./routes/api/user";
 import profile from "./routes/api/profile";
 import cryptowallets from "./routes/api/crypto-wallets";
+var morgan = require('morgan')
 
 const app = express();
+
+// Logging
+app.use(morgan('dev'))
 
 // CORS
 var corsOptions = {
