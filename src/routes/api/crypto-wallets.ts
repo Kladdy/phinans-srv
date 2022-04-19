@@ -14,9 +14,88 @@ import User, { IUser } from "../../models/User";
 import getBalances from "../../tools/nh-integration";
 import WalletNiceHash, { IWalletNiceHash } from "../../models/CryptoWallets/WalletNiceHash";
 import { Types } from "mongoose";
+import WalletDataNiceHash from "../../models/CryptoWallets/WalletDataNiceHash";
 
 
 const router: Router = Router();
+
+// @route   GET crypto-wallets/fetch
+// @desc    Fetch data for all wallets on account
+// @access  Private
+router.get(
+  "/fetch",
+  auth,
+  [],
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ errors: errors.array() });
+    }
+
+    const userIdAsObjectId = req.userIdAsObjectId;
+
+    try {
+        var fetchErrors : any = {nicehash: []}
+      
+        // NiceHash
+        {
+          // Find all NiceHash wallets for user
+          const allWalletsNiceHash = await WalletNiceHash.find({userId: userIdAsObjectId}).exec();
+
+          if (allWalletsNiceHash != null) {
+            allWalletsNiceHash.forEach(async wallet => {
+              // Get balances to test if the configuration is valid
+              const balances = await getBalances(wallet)
+
+              // Check if response contains errors and add it to list of fetchErrors
+              if (balances.error_id != null) {
+                fetchErrors.nicehash.push({broker: "NiceHash", label: wallet.label, errors: balances.errors })
+                return;
+              }
+
+              // Build wallet data object based on IWalletDataNiceHash
+              const walletDataNiceHash = {
+                userId: userIdAsObjectId,
+                walletId: wallet._id,
+                currency: balances.total.currency,
+                totalBalance: Number(balances.total.totalBalance),
+                available: Number(balances.total.available),
+                debt: Number(balances.total.debt),
+                pending: Number(balances.total.pending),
+                time: new Date(),
+                created: new Date(),
+                updated: new Date(),
+              };
+
+              // Add this wallet data object
+              const walletData = new WalletDataNiceHash(walletDataNiceHash);
+
+              await walletData.save();
+
+
+            })
+          }
+
+          res.json({});
+        }
+
+    } catch (err) {
+      console.error(err.message);
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: true,
+        errors: [
+          {
+            message: "Server Error",
+          },
+        ],
+      });
+    }
+  }
+);
+
 
 // @route   POST crypto-wallets/add
 // @desc    Add crypto wallet

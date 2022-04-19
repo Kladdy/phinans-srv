@@ -7,7 +7,7 @@ function _interopRequireDefault(module: any) {
 }
 
 var _cryptoJs = _interopRequireDefault(require('crypto-js'))
-var _qs = require('qs');
+var qs = _interopRequireDefault(require('qs'));
 import https from 'https';
 
 function createNonce() {
@@ -48,7 +48,7 @@ const getAuthHeader = (apiKey: string, apiSecret: string, time: string, nonce: s
   if (query)
       hmac.update(
           typeof query == 'object'
-              ? _qs.default.stringify(query)
+              ? qs.default.stringify(query)
               : query
       )
 
