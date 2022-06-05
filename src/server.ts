@@ -8,6 +8,7 @@ import auth from "./routes/api/auth";
 import user from "./routes/api/user";
 import profile from "./routes/api/profile";
 import cryptowallets from "./routes/api/crypto-wallets";
+import holdings from "./routes/api/holdings";
 var morgan = require('morgan')
 
 const app = express();
@@ -42,6 +43,7 @@ app.use("/api/auth", auth);
 app.use("/api/user", user);
 app.use("/api/profile", profile);
 app.use("/api/crypto-wallets", cryptowallets);
+app.use("/api/holdings", holdings);
 
 const port = app.get("port");
 const server = app.listen(port, () =>
